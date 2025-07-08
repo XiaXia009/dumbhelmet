@@ -1,35 +1,36 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import uvicorn
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app)  # 開放 CORS，允許所有來源
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.route('/')
+def index():
+    return jsonify({"message": "This is backend server"})
+    # return template('index.html')
 
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-@app.post("/login")
-async def login(data: LoginRequest):
-    if data.email == "admin@gmail.com" and data.password == "admin":
-        return {
-            "token": "mock-token"
-        }
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    if email == "admin@gmail.com" and password == "admin":
+        return jsonify({"token": "mock-token"})
     else:
-        raise HTTPException(status_code=401, detail="錯誤的密碼或電子郵件")
+        return jsonify({"detail": "錯誤的密碼或電子郵件"}), 401
 
-@app.get("/me")
-async def me():
-    # 模擬返回用戶資料
-    return {
+@app.route('/uwb_data', methods=['POST'])
+def uwb_data():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    x = data.get('x')
+    y = data.get('y')
+
+    return jsonify({"message": "UWB data received", "data": data})
+
+@app.route('/me', methods=['GET'])
+def me():
+    return jsonify({
         "id": "1",
         "name": "Admin",
         "email": "admin@gmail.com",
@@ -37,7 +38,7 @@ async def me():
         "department": "Safety Management",
         "phone": "+886 912 345 678",
         "createdAt": "2024-01-15"
-    }
+    })
 
-if __name__ == "__main__":
-    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8000, debug=True)

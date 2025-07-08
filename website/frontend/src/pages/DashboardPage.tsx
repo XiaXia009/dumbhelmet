@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Users, 
-  HardHat, 
-  Shield, 
-  AlertTriangle, 
-  TrendingUp, 
+import {
+  Users,
+  HardHat,
+  Shield,
+  AlertTriangle,
+  TrendingUp,
   Battery,
   MapPin,
   Clock,
@@ -31,92 +31,92 @@ const stats = [
 ];
 
 const recentActivity = [
-  { 
-    id: 1, 
-    type: 'device_connect', 
-    message: '測試01-安全帽已連線', 
-    time: '5分鐘前', 
+  {
+    id: 1,
+    type: 'device_connect',
+    message: '測試01-安全帽已連線',
+    time: '5分鐘前',
     status: 'success',
     icon: Wifi
   },
-  { 
-    id: 2, 
-    type: 'zone_warning', 
-    message: '危險區域2有人員進入', 
-    time: '12分鐘前', 
+  {
+    id: 2,
+    type: 'zone_warning',
+    message: '危險區域2有人員進入',
+    time: '12分鐘前',
     status: 'warning',
     icon: ShieldAlert
   },
-  { 
-    id: 3, 
-    type: 'personnel_add', 
-    message: '新增人員：測試01', 
-    time: '25分鐘前', 
+  {
+    id: 3,
+    type: 'personnel_add',
+    message: '新增人員：測試01',
+    time: '25分鐘前',
     status: 'info',
     icon: UserPlus
   },
-  { 
-    id: 4, 
-    type: 'device_low_battery', 
-    message: '設備 [測試01] 電量低於20%', 
-    time: '1小時前', 
+  {
+    id: 4,
+    type: 'device_low_battery',
+    message: '設備 [測試01] 電量低於20%',
+    time: '1小時前',
     status: 'warning',
     icon: BatteryLow
   },
-  { 
-    id: 5, 
-    type: 'emergency', 
-    message: '緊急按鈕被觸發 - A區', 
-    time: '2小時前', 
+  {
+    id: 5,
+    type: 'emergency',
+    message: '緊急按鈕被觸發 - A區',
+    time: '2小時前',
     status: 'danger',
     icon: Zap
   },
-  { 
-    id: 6, 
-    type: 'device_disconnect', 
-    message: '測試01-安全帽已斷線', 
-    time: '3小時前', 
+  {
+    id: 6,
+    type: 'device_disconnect',
+    message: '測試01-安全帽已斷線',
+    time: '3小時前',
     status: 'error',
     icon: WifiOff
   },
-  { 
-    id: 7, 
-    type: 'general_info', 
-    message: '系統維護完成', 
-    time: '4小時前', 
+  {
+    id: 7,
+    type: 'general_info',
+    message: '系統維護完成',
+    time: '4小時前',
     status: 'info',
     icon: Info
   },
-  { 
-    id: 8, 
-    type: 'zone_danger', 
-    message: '高壓電區域檢測到異常且人員未回應', 
-    time: '5小時前', 
+  {
+    id: 8,
+    type: 'zone_danger',
+    message: '高壓電區域檢測到異常且人員未回應',
+    time: '5小時前',
     status: 'danger',
     icon: AlertTriangle
   },
-  { 
-    id: 9, 
-    type: 'zone_safe_response', 
-    message: '高壓電區域檢測到異常但人員回報安全', 
-    time: '6小時前', 
+  {
+    id: 9,
+    type: 'zone_safe_response',
+    message: '高壓電區域檢測到異常但人員回報安全',
+    time: '6小時前',
     status: 'resolved',
     icon: ShieldCheck
   }
 ];
 
 const deviceStatus = [
-  { id: 'HD-001', name: '王小明', battery: 85, location: 'A區', status: 'online' },
-  { id: 'HD-002', name: '李大華', battery: 92, location: 'B區', status: 'online' },
-  { id: 'HD-003', name: '張三', battery: 76, location: 'C區', status: 'online' },
-  { id: 'HD-004', name: '陳四', battery: 18, location: 'A區', status: 'warning' },
-  { id: 'HD-005', name: '劉五', battery: 0, location: '未知', status: 'offline' },
+  { id: 'HD-001', name: 'Test_User1', battery: 85, location: 'A區', status: 'online' },
+  { id: 'HD-002', name: 'Test_User2', battery: 92, location: 'B區', status: 'online' },
+  { id: 'HD-003', name: 'Test_User3', battery: 76, location: 'C區', status: 'online' },
+  { id: 'HD-004', name: 'Test_User4', battery: 18, location: 'A區', status: 'warning' },
+  { id: 'HD-005', name: 'Test_User5', battery: 0, location: '未知', status: 'offline' },
 ];
 
 export const DashboardPage: React.FC = () => {
   // 天氣與時間 state
   const [weather, setWeather] = useState<any>(null);
-  const [location, setLocation] = useState<{lat: number, lon: number} | null>(null);
+  const [location, setLocation] = useState<{ lat: number, lon: number } | null>(null);
   const [time, setTime] = useState<string>("");
   const [ampm, setAmpm] = useState<string>("");
 
@@ -273,7 +273,7 @@ export const DashboardPage: React.FC = () => {
             {recentActivity.map((activity) => {
               const Icon = activity.icon;
               const style = getActivityStyle(activity.status);
-              
+
               return (
                 <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className={`${style.iconBg} rounded-full p-2 flex-shrink-0`}>
@@ -299,11 +299,10 @@ export const DashboardPage: React.FC = () => {
             {deviceStatus.map((device) => (
               <div key={device.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    device.status === 'online' ? 'bg-green-500' :
+                  <div className={`w-3 h-3 rounded-full ${device.status === 'online' ? 'bg-green-500' :
                     device.status === 'warning' ? 'bg-yellow-500' :
-                    'bg-gray-400'
-                  }`}></div>
+                      'bg-gray-400'
+                    }`}></div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">{device.name}</p>
                     <p className="text-xs text-gray-500">{device.id}</p>
@@ -315,11 +314,10 @@ export const DashboardPage: React.FC = () => {
                     <span className="text-sm text-gray-600">{device.location}</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <Battery className={`w-4 h-4 ${
-                      device.battery > 50 ? 'text-green-500' :
+                    <Battery className={`w-4 h-4 ${device.battery > 50 ? 'text-green-500' :
                       device.battery > 20 ? 'text-yellow-500' :
-                      'text-red-500'
-                    }`} />
+                        'text-red-500'
+                      }`} />
                     <span className="text-sm text-gray-600">{device.battery}%</span>
                   </div>
                 </div>

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Battery, 
-  Wifi, 
-  WifiOff, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Battery,
+  Wifi,
+  WifiOff,
   MapPin,
   Settings,
   Trash2,
@@ -16,52 +16,52 @@ import {
 } from 'lucide-react';
 
 const mockDevices = [
-  { 
-    id: 'HD-001', 
-    name: '王小明', 
-    battery: 85, 
-    location: 'A區-鋼架工程', 
-    status: 'online', 
+  {
+    id: 'HD-001',
+    name: 'Test_User1',
+    battery: 85,
+    location: 'A區-鋼架工程',
+    status: 'online',
     lastSeen: '剛剛',
     assignedAt: '2024-01-15',
     phone: '0912-345-678'
   },
-  { 
-    id: 'HD-002', 
-    name: '李大華', 
-    battery: 92, 
-    location: 'B區-混凝土澆築', 
-    status: 'online', 
+  {
+    id: 'HD-002',
+    name: 'Test_User2',
+    battery: 92,
+    location: 'B區-混凝土澆築',
+    status: 'online',
     lastSeen: '2分鐘前',
     assignedAt: '2024-01-14',
     phone: '0912-345-679'
   },
-  { 
-    id: 'HD-003', 
-    name: '張三', 
-    battery: 76, 
-    location: 'C區-基礎工程', 
-    status: 'online', 
+  {
+    id: 'HD-003',
+    name: 'Test_User3',
+    battery: 76,
+    location: 'C區-基礎工程',
+    status: 'online',
     lastSeen: '5分鐘前',
     assignedAt: '2024-01-13',
     phone: '0912-345-680'
   },
-  { 
-    id: 'HD-004', 
-    name: '陳四', 
-    battery: 18, 
-    location: 'A區-鋼架工程', 
-    status: 'warning', 
+  {
+    id: 'HD-004',
+    name: 'Test_User4',
+    battery: 18,
+    location: 'A區-鋼架工程',
+    status: 'warning',
     lastSeen: '30分鐘前',
     assignedAt: '2024-01-12',
     phone: '0912-345-681'
   },
-  { 
-    id: 'HD-005', 
-    name: '劉五', 
-    battery: 0, 
-    location: '未知', 
-    status: 'offline', 
+  {
+    id: 'HD-005',
+    name: 'Test_User5',
+    battery: 0,
+    location: '未知',
+    status: 'offline',
     lastSeen: '2小時前',
     assignedAt: '2024-01-11',
     phone: '0912-345-682'
@@ -76,7 +76,7 @@ export const DevicesPage: React.FC = () => {
 
   const filteredDevices = devices.filter(device => {
     const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         device.id.toLowerCase().includes(searchTerm.toLowerCase());
+      device.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || device.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -249,11 +249,10 @@ export const DevicesPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       {getStatusIcon(device.status)}
-                      <span className={`text-sm font-medium ${
-                        device.status === 'online' ? 'text-green-600' :
+                      <span className={`text-sm font-medium ${device.status === 'online' ? 'text-green-600' :
                         device.status === 'warning' ? 'text-yellow-600' :
-                        'text-red-600'
-                      }`}>
+                          'text-red-600'
+                        }`}>
                         {getStatusText(device.status)}
                       </span>
                     </div>
