@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { io } from "socket.io-client";
 import {
   Users,
-  HardHat,
   Shield,
   AlertTriangle,
   TrendingUp,
@@ -17,11 +18,10 @@ import {
   Info,
   Zap,
   ShieldAlert,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   ShieldCheck
 } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const stats = [
   { label: '應到人員', value: 'n/n', change: '0', icon: Users, color: 'bg-blue-500' },
@@ -105,6 +105,7 @@ const recentActivity = [
   }
 ];
 
+
 const deviceStatus = [
   { id: 'HD-001', name: 'Test_User1', battery: 85, location: 'A區', status: 'online' },
   { id: 'HD-002', name: 'Test_User2', battery: 92, location: 'B區', status: 'online' },
@@ -113,12 +114,33 @@ const deviceStatus = [
   { id: 'HD-005', name: 'Test_User5', battery: 0, location: '未知', status: 'offline' },
 ];
 
+const iconMap = {
+  Users,
+  Shield,
+  AlertTriangle,
+  TrendingUp,
+  Battery,
+  MapPin,
+  Clock,
+  ThermometerSun,
+  Wind,
+  Wifi,
+  WifiOff,
+  BatteryLow,
+  UserPlus,
+  Info,
+  Zap,
+  ShieldAlert,
+  ShieldCheck
+};
+
 export const DashboardPage: React.FC = () => {
   // 天氣與時間 state
   const [weather, setWeather] = useState<any>(null);
   const [location, setLocation] = useState<{ lat: number, lon: number } | null>(null);
   const [time, setTime] = useState<string>("");
   const [ampm, setAmpm] = useState<string>("");
+  const [activities, setActivities] = useState(recentActivity);
 
   // 取得定位
   useEffect(() => {
@@ -165,6 +187,52 @@ export const DashboardPage: React.FC = () => {
     const timer = setInterval(updateTime, 1000 * 30);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const socket = io(API_URL, {
+      transports: ['websocket'] // 可以不寫，它自己會 fallback
+    });
+
+    socket.on("connect", () => {
+      console.log("✅ Socket.IO 已連線");
+    });
+
+    socket.on("disconnect", () => {
+      console.log("❌ Socket.IO 已斷線");
+    });
+
+    socket.on("activity", (data) => {
+      try {
+        const parsed =
+          typeof data === "string" ? JSON.parse(data) : data;
+
+        console.log("收到 activity:", parsed);
+
+        setActivities((prev) => [
+          {
+            id: parsed.id ?? Date.now(),
+            type: parsed.type || "general_info",
+            message: parsed.message || "未知訊息",
+            time: parsed.time ?? Date.now(),
+            status: parsed.status || "info",
+            icon: iconMap[parsed.icon as keyof typeof iconMap] || Info,
+          },
+          ...prev.slice(0, 49),
+        ]);
+      } catch (err) {
+        console.error("解析 Socket.IO 訊息失敗", err);
+      }
+    });
+
+    socket.on("error", (err) => {
+      console.error("Socket.IO 出錯", err);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
 
   // 天氣中文轉換
   const weatherDesc = (code: number) => {
@@ -270,7 +338,7 @@ export const DashboardPage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">最近活動</h3>
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {recentActivity.map((activity) => {
+            {activities.map((activity) => {
               const Icon = activity.icon;
               const style = getActivityStyle(activity.status);
 

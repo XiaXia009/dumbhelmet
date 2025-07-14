@@ -1,0 +1,74 @@
+const recentActivity = [
+  {
+    id: 1,
+    type: 'device_connect',
+    message: '測試01-安全帽已連線',
+    time: '5分鐘前',
+    status: 'success',
+    icon: Wifi
+  },
+  {
+    id: 2,
+    type: 'zone_warning',
+    message: '危險區域2有人員進入',
+    time: '12分鐘前',
+    status: 'warning',
+    icon: ShieldAlert
+  },
+  {
+    id: 3,
+    type: 'personnel_add',
+    message: '新增人員：測試01',
+    time: '25分鐘前',
+    status: 'info',
+    icon: UserPlus
+  },
+  {
+    id: 4,
+    type: 'device_low_battery',
+    message: '設備 [測試01] 電量低於20%',
+    time: '1小時前',
+    status: 'warning',
+    icon: BatteryLow
+  },
+  {
+    id: 5,
+    type: 'emergency',
+    message: '緊急按鈕被觸發 - A區',
+    time: '2小時前',
+    status: 'danger',
+    icon: Zap
+  },
+  {
+    id: 6,
+    type: 'device_disconnect',
+    message: '測試01-安全帽已斷線',
+    time: '3小時前',
+    status: 'error',
+    icon: WifiOff
+  },
+  {
+    id: 7,
+    type: 'general_info',
+    message: '系統維護完成',
+    time: '4小時前',
+    status: 'info',
+    icon: Info
+  },
+  {
+    id: 8,
+    type: 'zone_danger',
+    message: '高壓電區域檢測到異常且人員未回應',
+    time: '5小時前',
+    status: 'danger',
+    icon: AlertTriangle
+  },
+  {
+    id: 9,
+    type: 'zone_safe_response',
+    message: '高壓電區域檢測到異常但人員回報安全',
+    time: '6小時前',
+    status: 'resolved',
+    icon: ShieldCheck
+  }
+];

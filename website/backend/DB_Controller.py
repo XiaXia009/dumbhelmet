@@ -24,25 +24,6 @@ class DBController:
             )
         ''')
 
-        # 創建 UWB硬體表 UWB_Hardware
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS UWB_Hardware (
-                UWB_ID TEXT PRIMARY KEY,
-                UWB_UUID TEXT
-            )
-        ''')
-
-        # 創建 UWB定位表 UWB_Position
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS UWB_Position (
-                UWB_UUID TEXT,
-                Time TEXT,
-                x REAL,
-                y REAL,
-                FOREIGN KEY (UWB_UUID) REFERENCES UWB_Hardware(UWB_UUID)
-            )
-        ''')
-
         conn.commit()
         conn.close()
 
@@ -54,22 +35,6 @@ class DBController:
         conn.commit()
         conn.close()
 
-    def add_uwb_hardware(self, uwb_id, uwb_uuid):
-        """添加新的 UWB 硬體到 UWB_Hardware 表"""
-        conn = self._connect()
-        c = conn.cursor()
-        c.execute("INSERT INTO UWB_Hardware (UWB_ID, UWB_UUID) VALUES (?, ?)", (uwb_id, uwb_uuid))
-        conn.commit()
-        conn.close()
-
-    def add_uwb_position(self, uwb_uuid, time, x, y):
-        """添加 UWB 定位數據到 UWB_Position 表"""
-        conn = self._connect()
-        c = conn.cursor()
-        c.execute("INSERT INTO UWB_Position (UWB_UUID, Time, x, y) VALUES (?, ?, ?, ?)", (uwb_uuid, time, x, y))
-        conn.commit()
-        conn.close()
-
     def get_workers(self):
         """獲取所有工人"""
         conn = self._connect()
@@ -78,21 +43,3 @@ class DBController:
         workers = c.fetchall()
         conn.close()
         return workers
-
-    def get_uwb_hardware(self):
-        """獲取所有 UWB 硬體"""
-        conn = self._connect()
-        c = conn.cursor()
-        c.execute("SELECT * FROM UWB_Hardware")
-        hardware = c.fetchall()
-        conn.close()
-        return hardware
-
-    def get_uwb_positions(self):
-        """獲取所有 UWB 定位"""
-        conn = self._connect()
-        c = conn.cursor()
-        c.execute("SELECT * FROM UWB_Position")
-        positions = c.fetchall()
-        conn.close()
-        return positions

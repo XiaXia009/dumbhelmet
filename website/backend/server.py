@@ -1,13 +1,107 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit  # 新增
+from DB_Controller import DBController
+from influx_linker import Influxlinker
 
 app = Flask(__name__)
-CORS(app)  # 開放 CORS，允許所有來源
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+db_controller = DBController()
+influx_linker = Influxlinker()
 
 @app.route('/')
 def index():
-    return jsonify({"message": "This is backend server"})
-    # return template('index.html')
+    return 'Welcome to Flask SQLite + InfluxDB Example!'
+
+
+@app.route('/add_worker', methods=['POST'])
+def add_worker():
+    data = request.json
+    name = data.get('name')
+    blood_type = data.get('blood_type')
+    uwb_id = data.get('uwb_id')
+
+    if not name or not blood_type or not uwb_id:
+        return jsonify({"error": "Name, blood type, and UWB ID are required!"}), 400
+
+    db_controller.add_worker(name, blood_type, uwb_id)
+    return jsonify({"message": "Worker added successfully!"}), 201
+
+
+@app.route('/add_uwb_hardware', methods=['POST'])
+def add_uwb_hardware():
+    data = request.json
+    uwb_id = data.get('uwb_id')
+    uwb_uuid = data.get('uwb_uuid')
+
+    if not uwb_id or not uwb_uuid:
+        return jsonify({"error": "UWB ID and UWB UUID are required!"}), 400
+
+    db_controller.add_uwb_hardware(uwb_id, uwb_uuid)
+    return jsonify({"message": "UWB hardware added successfully!"}), 201
+
+
+@app.route('/add_uwb_position', methods=['POST'])
+def add_uwb_position():
+    data = request.json
+    uwb_uuid = data.get('uwb_uuid')
+    time = data.get('time')
+    x = data.get('x')
+    y = data.get('y')
+
+    if not uwb_uuid or not time or x is None or y is None:
+        return jsonify({"error": "UWB UUID, time, and coordinates are required!"}), 400
+
+    db_controller.add_uwb_position(uwb_uuid, time, x, y)
+    return jsonify({"message": "UWB position added to SQLite successfully!"}), 201
+
+
+@app.route('/add_uwb_position_influx', methods=['POST'])
+def add_uwb_position_influx():
+    data = request.json
+    tag_id = data.get('tag_id')
+    timestamp = data.get('time')
+    x = data.get('x')   
+    y = data.get('y')
+
+    if not tag_id or not timestamp or x is None or y is None:
+        return jsonify({"error": "tag_id, time, and coordinates are required!"}), 400
+
+    influx_linker.write_position(tag_id, x, y, timestamp)
+    return jsonify({"message": "UWB position added to InfluxDB successfully!"}), 201
+
+
+@app.route('/workers', methods=['GET'])
+def get_workers():
+    workers = db_controller.get_workers()
+    return jsonify(workers)
+
+
+@app.route('/uwb_hardware', methods=['GET'])
+def get_uwb_hardware():
+    hardware = db_controller.get_uwb_hardware()
+    return jsonify(hardware)
+
+
+@app.route('/uwb_positions', methods=['GET'])
+def get_uwb_positions():
+    positions = db_controller.get_uwb_positions()
+    return jsonify(positions)
+
+
+@app.route('/uwb_positions_influx', methods=['GET'])
+def get_uwb_positions_influx():
+    tag_id = request.args.get('tag_id')
+    start = request.args.get('start')
+    end = request.args.get('end')
+
+    if not tag_id or not start or not end:
+        return jsonify({"error": "tag_id, start, and end are required!"}), 400
+
+    data = influx_linker.query_positions(tag_id=tag_id, start_date=start, end_date=end)
+    return jsonify(data)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -18,15 +112,6 @@ def login():
         return jsonify({"token": "mock-token"})
     else:
         return jsonify({"detail": "錯誤的密碼或電子郵件"}), 401
-
-@app.route('/uwb_data', methods=['POST'])
-def uwb_data():
-    data = request.get_json()
-    user_id = data.get('user_id')
-    x = data.get('x')
-    y = data.get('y')
-
-    return jsonify({"message": "UWB data received", "data": data})
 
 @app.route('/me', methods=['GET'])
 def me():
@@ -40,5 +125,40 @@ def me():
         "createdAt": "2024-01-15"
     })
 
+@app.route('/websocket_test', methods=['POST'])
+def websocket_test():
+    """
+    Expects JSON body: {type, message, time, status, icon}
+    Emits the activity to all connected WebSocket clients.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data"}), 400
+
+    import time
+    activity = {
+        "id": int(data.get("id", 0)) or int(time.time() * 1000),
+        "type": data.get("type", "general_info"),
+        "message": data.get("message", "未知訊息"),
+        "time": data.get("time") or int(time.time() * 1000),
+        "status": data.get("status", "info"),
+        "icon": data.get("icon", "Info"),
+    }
+
+    # 廣播到所有連線的 socket 客戶端
+    emit('activity', activity, broadcast=True, namespace='/')
+
+    return jsonify({"status": "OK", "activity": activity}), 200
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8000, debug=True)
+    db_controller.init_db()
+    # app.run(host='127.0.0.1', port=5000, debug=True)  # 註解掉原本的
+    socketio.run(app, host='127.0.0.1', port=5000, debug=True)
