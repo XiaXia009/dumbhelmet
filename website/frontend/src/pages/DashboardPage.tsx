@@ -201,12 +201,12 @@ export const DashboardPage: React.FC = () => {
       console.log("❌ Socket.IO 已斷線");
     });
 
-    socket.on("activity", (data) => {
+    socket.on("message", (data) => {
       try {
         const parsed =
           typeof data === "string" ? JSON.parse(data) : data;
 
-        console.log("收到 activity:", parsed);
+        console.log("收到 message:", parsed);
 
         setActivities((prev) => [
           {

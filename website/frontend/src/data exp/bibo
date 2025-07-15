@@ -1,0 +1,6 @@
+name TEXT,        user
+blood_type TEXT,  user
+UWB_ID TEXT,      system
+UWB_Phone TEXT,   system
+charge TEXT,      system
+IMEI TEXT,        user

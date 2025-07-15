@@ -1,14 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit  # 新增
-from DB_Controller import DBController
+from flask_socketio import SocketIO, emit
+from flasgger import Swagger  # 新增
+from sqlite_linker import SQLiteLinker
 from influx_linker import Influxlinker
 
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
+swagger = Swagger(app)  # 新增
 
-db_controller = DBController()
+sqlite_linker = SQLiteLinker()
 influx_linker = Influxlinker()
 
 @app.route('/')
@@ -26,7 +28,7 @@ def add_worker():
     if not name or not blood_type or not uwb_id:
         return jsonify({"error": "Name, blood type, and UWB ID are required!"}), 400
 
-    db_controller.add_worker(name, blood_type, uwb_id)
+    sqlite_linker.add_worker(name, blood_type, uwb_id)
     return jsonify({"message": "Worker added successfully!"}), 201
 
 
@@ -39,7 +41,7 @@ def add_uwb_hardware():
     if not uwb_id or not uwb_uuid:
         return jsonify({"error": "UWB ID and UWB UUID are required!"}), 400
 
-    db_controller.add_uwb_hardware(uwb_id, uwb_uuid)
+    sqlite_linker.add_uwb_hardware(uwb_id, uwb_uuid)
     return jsonify({"message": "UWB hardware added successfully!"}), 201
 
 
@@ -54,7 +56,7 @@ def add_uwb_position():
     if not uwb_uuid or not time or x is None or y is None:
         return jsonify({"error": "UWB UUID, time, and coordinates are required!"}), 400
 
-    db_controller.add_uwb_position(uwb_uuid, time, x, y)
+    sqlite_linker.add_uwb_position(uwb_uuid, time, x, y)
     return jsonify({"message": "UWB position added to SQLite successfully!"}), 201
 
 
@@ -75,19 +77,19 @@ def add_uwb_position_influx():
 
 @app.route('/workers', methods=['GET'])
 def get_workers():
-    workers = db_controller.get_workers()
+    workers = sqlite_linker.get_workers()
     return jsonify(workers)
 
 
 @app.route('/uwb_hardware', methods=['GET'])
 def get_uwb_hardware():
-    hardware = db_controller.get_uwb_hardware()
+    hardware = sqlite_linker.get_uwb_hardware()
     return jsonify(hardware)
 
 
 @app.route('/uwb_positions', methods=['GET'])
 def get_uwb_positions():
-    positions = db_controller.get_uwb_positions()
+    positions = sqlite_linker.get_uwb_positions()
     return jsonify(positions)
 
 
@@ -125,12 +127,8 @@ def me():
         "createdAt": "2024-01-15"
     })
 
-@app.route('/websocket_test', methods=['POST'])
+@app.route('/message', methods=['POST'])
 def websocket_test():
-    """
-    Expects JSON body: {type, message, time, status, icon}
-    Emits the activity to all connected WebSocket clients.
-    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "No JSON data"}), 400
@@ -145,9 +143,7 @@ def websocket_test():
         "icon": data.get("icon", "Info"),
     }
 
-    # 廣播到所有連線的 socket 客戶端
-    emit('activity', activity, broadcast=True, namespace='/')
-
+    emit('message', activity, broadcast=True, namespace='/')
     return jsonify({"status": "OK", "activity": activity}), 200
 
 @socketio.on('connect')
@@ -159,6 +155,6 @@ def handle_disconnect():
     print('Client disconnected')
 
 if __name__ == '__main__':
-    db_controller.init_db()
+    sqlite_linker.init_db()
     # app.run(host='127.0.0.1', port=5000, debug=True)  # 註解掉原本的
     socketio.run(app, host='127.0.0.1', port=5000, debug=True)

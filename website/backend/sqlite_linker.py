@@ -1,6 +1,6 @@
 import sqlite3
 
-class DBController:
+class SQLiteLinker:
     def __init__(self, db_name='database.db'):
         self.db_name = db_name
 
@@ -20,6 +20,9 @@ class DBController:
                 name TEXT,
                 blood_type TEXT,
                 UWB_ID TEXT,
+                UWB_Phone TEXT,
+                charge TEXT,
+                IMEI TEXT,
                 FOREIGN KEY (UWB_ID) REFERENCES UWB_Hardware(UWB_ID)
             )
         ''')
@@ -27,11 +30,17 @@ class DBController:
         conn.commit()
         conn.close()
 
-    def add_worker(self, name, blood_type, uwb_id):
+    def add_worker(self, name, blood_type, uwb_id, uwb_phone, charge, imei):
         """添加新工人到 Peoples 表"""
         conn = self._connect()
         c = conn.cursor()
-        c.execute("INSERT INTO Peoples (name, blood_type, UWB_ID) VALUES (?, ?, ?)", (name, blood_type, uwb_id))
+        c.execute(
+            '''
+            INSERT INTO Peoples (name, blood_type, UWB_ID, UWB_Phone, charge, IMEI) 
+            VALUES (?, ?, ?, ?, ?, ?)
+            ''',
+            (name, blood_type, uwb_id, uwb_phone, charge, imei)
+        )
         conn.commit()
         conn.close()
 

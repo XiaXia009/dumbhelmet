@@ -296,36 +296,36 @@ export const DevicesPage: React.FC = () => {
       {showAddDevice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">新增安全帽設備</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">新增安全帽</h3>
             <form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  設備ID
+                  人員名稱
                 </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="例如：HD-006"
+                  placeholder="配對人員姓名"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  配對人員
+                  血型
                 </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="輸入人員姓名"
+                  placeholder="A/B/O/AB"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  聯絡電話
+                  裝置序號
                 </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="0912-345-678"
+                  placeholder="862636052640529"
                 />
               </div>
               <div className="flex justify-end space-x-3 mt-6">
