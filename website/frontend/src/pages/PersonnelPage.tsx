@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Edit, 
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import {
+  Plus,
+  Search,
+  Filter,
+  User,
+  Phone,
+  MapPin,
+  Edit,
   Trash2,
   Shield,
   HardHat,
@@ -16,6 +16,8 @@ import {
   XCircle,
   Droplets
 } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const mockPersonnel = [
   {
@@ -87,17 +89,54 @@ export const PersonnelPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddPersonnel, setShowAddPersonnel] = useState(false);
 
+  useEffect(() => {
+    fetchStaffs();
+  }, []);
+
+  const fetchStaffs = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/get_staffs`);
+      if (Array.isArray(res.data)) {
+        setPersonnel(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch staffs', err);
+    }
+  };
+
+  const handleAddPersonnel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = new FormData(e.target as HTMLFormElement);
+
+    const data = {
+      name: form.get('name'),
+      position: form.get('position'),
+      department: form.get('department'),
+      phone: form.get('phone'),
+      status: form.get('status'),
+      blood: form.get('blood'),
+    };
+
+    try {
+      await axios.post(`${API_URL}/add_staff`, data);
+      setShowAddPersonnel(false);
+      fetchStaffs();
+    } catch (err) {
+      console.error('Failed to add staff', err);
+    }
+  };
+
   const filteredPersonnel = personnel.filter(person => {
     const matchesSearch = person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         person.phone.includes(searchTerm);
+      person.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.phone?.includes(searchTerm);
     const matchesDepartment = departmentFilter === 'all' || person.department === departmentFilter;
     const matchesStatus = statusFilter === 'all' || person.status === statusFilter;
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 
   const getStatusIcon = (status: string) => {
-    return status === 'active' 
+    return status === 'active'
       ? <CheckCircle className="w-4 h-4 text-green-500" />
       : <XCircle className="w-4 h-4 text-red-500" />;
   };
@@ -107,30 +146,32 @@ export const PersonnelPage: React.FC = () => {
   };
 
   const getRoleIcon = (role: string) => {
-    if (role.includes('安全')) return <Shield className="w-4 h-4 text-blue-500" />;
+    if (role?.includes('安全')) return <Shield className="w-4 h-4 text-blue-500" />;
     return <HardHat className="w-4 h-4 text-orange-500" />;
   };
 
   const getBloodTypeColor = (bloodType: string) => {
     switch (bloodType) {
-      case 'A+':
-      case 'A-':
-        return 'bg-red-100 text-red-800';
-      case 'B+':
-      case 'B-':
-        return 'bg-blue-100 text-blue-800';
-      case 'AB+':
-      case 'AB-':
-        return 'bg-purple-100 text-purple-800';
-      case 'O+':
-      case 'O-':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'A+': case 'A-': return 'bg-red-100 text-red-800';
+      case 'B+': case 'B-': return 'bg-blue-100 text-blue-800';
+      case 'AB+': case 'AB-': return 'bg-purple-100 text-purple-800';
+      case 'O+': case 'O-': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const departments = [...new Set(personnel.map(p => p.department))];
+  const departments = [
+    ...new Set([
+      '結構工程部',
+      '土木工程部',
+      '安全管理部',
+      '設計部',
+      '監工部',
+      '機電部',
+      '預算部',
+      ...personnel.map(p => p.department)
+    ])
+  ];
 
   return (
     <div className="space-y-6">
@@ -174,9 +215,9 @@ export const PersonnelPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">在線設備</p>
+              <p className="text-sm font-medium text-gray-600">離職人員</p>
               <p className="text-2xl font-bold text-orange-600">
-                {personnel.filter(p => p.status === 'active').length}
+                {personnel.filter(p => p.status === 'inactive').length}
               </p>
             </div>
             <HardHat className="w-8 h-8 text-orange-500" />
@@ -211,14 +252,15 @@ export const PersonnelPage: React.FC = () => {
           <div className="flex items-center space-x-2">
             <Filter className="w-4 h-4 text-gray-400" />
             <select
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              name="department"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
-              <option value="all">全部部門</option>
-              {departments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
-              ))}
+              <option value="">選擇部門</option>
+              {departments.length === 0
+                ? <option value="預設部門">預設部門</option>
+                : departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
             </select>
           </div>
           <div>
@@ -251,9 +293,8 @@ export const PersonnelPage: React.FC = () => {
               </div>
               <div className="flex items-center space-x-1">
                 {getStatusIcon(person.status)}
-                <span className={`text-sm font-medium ${
-                  person.status === 'active' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <span className={`text-sm font-medium ${person.status === 'active' ? 'text-green-600' : 'text-red-600'
+                  }`}>
                   {getStatusText(person.status)}
                 </span>
               </div>
@@ -273,10 +314,6 @@ export const PersonnelPage: React.FC = () => {
                 <span className="text-sm text-gray-600">{person.phone}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">{person.email}</span>
-              </div>
-              <div className="flex items-center space-x-2">
                 <Droplets className="w-4 h-4 text-red-400" />
                 <span className="text-sm text-gray-600">血型:</span>
                 <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getBloodTypeColor(person.bloodType)}`}>
@@ -285,25 +322,25 @@ export const PersonnelPage: React.FC = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">{person.currentLocation}</span>
+                <span className="text-sm text-gray-600">最後位置: None</span>{/* {person.currentLocation} */}
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">最後上線: {person.lastSeen}</span>
+                <span className="text-sm text-gray-600">最後上線: None</span>{/* {person.lastSeen} */}
               </div>
             </div>
 
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500">證照</p>
+                  {/* <p className="text-xs text-gray-500">證照</p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {person.certifications.map((cert, index) => (
                       <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
                         {cert}
                       </span>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
                 <div className="flex items-center space-x-2">
                   <button className="text-orange-600 hover:text-orange-800">
@@ -324,35 +361,35 @@ export const PersonnelPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">新增人員</h3>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleAddPersonnel}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    姓名
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
                   <input
                     type="text"
+                    name="name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="請輸入姓名"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    職位
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">職位</label>
                   <input
                     type="text"
+                    name="position"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="例如：鋼架工程師"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    部門
-                  </label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">部門</label>
+                  <select
+                    name="department"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  >
                     <option value="">選擇部門</option>
                     {departments.map(dept => (
                       <option key={dept} value={dept}>{dept}</option>
@@ -360,33 +397,34 @@ export const PersonnelPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    電話
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
                   <input
                     type="text"
+                    name="phone"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="0912-345-678"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    電子信箱
-                  </label>
-                  <input
-                    type="email"
+                  <label className="block text-sm font-medium text-gray-700 mb-1">就職狀態</label>
+                  <select
+                    name="status"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder="example@construction.com"
-                  />
+                  >
+                    <option value="active">在職</option>
+                    <option value="inactive">離職</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    血型
-                  </label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                    <option value="">選擇血型</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">血型</label>
+                  <select
+                    name="blood"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  >
+                    <option value="">未設定血型</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
                     <option value="B+">B+</option>
@@ -398,16 +436,7 @@ export const PersonnelPage: React.FC = () => {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  證照 (多個證照請用逗號分隔)
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="例如：高空作業證,焊接證"
-                />
-              </div>
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"

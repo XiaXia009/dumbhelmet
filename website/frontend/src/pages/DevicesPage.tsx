@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -15,64 +15,27 @@ import {
   XCircle
 } from 'lucide-react';
 
-const mockDevices = [
-  {
-    id: 'HD-001',
-    name: 'Test_User1',
-    battery: 85,
-    location: 'A區-鋼架工程',
-    status: 'online',
-    lastSeen: '剛剛',
-    assignedAt: '2024-01-15',
-    phone: '0912-345-678'
-  },
-  {
-    id: 'HD-002',
-    name: 'Test_User2',
-    battery: 92,
-    location: 'B區-混凝土澆築',
-    status: 'online',
-    lastSeen: '2分鐘前',
-    assignedAt: '2024-01-14',
-    phone: '0912-345-679'
-  },
-  {
-    id: 'HD-003',
-    name: 'Test_User3',
-    battery: 76,
-    location: 'C區-基礎工程',
-    status: 'online',
-    lastSeen: '5分鐘前',
-    assignedAt: '2024-01-13',
-    phone: '0912-345-680'
-  },
-  {
-    id: 'HD-004',
-    name: 'Test_User4',
-    battery: 18,
-    location: 'A區-鋼架工程',
-    status: 'warning',
-    lastSeen: '30分鐘前',
-    assignedAt: '2024-01-12',
-    phone: '0912-345-681'
-  },
-  {
-    id: 'HD-005',
-    name: 'Test_User5',
-    battery: 0,
-    location: '未知',
-    status: 'offline',
-    lastSeen: '2小時前',
-    assignedAt: '2024-01-11',
-    phone: '0912-345-682'
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const DevicesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddDevice, setShowAddDevice] = useState(false);
-  const [devices, setDevices] = useState(mockDevices);
+  type Device = {
+    id: string;
+    name: string;
+    battery: number;
+    location: string;
+    status: string;
+    lastSeen: string;
+    assignedAt: string;
+    phone: string;
+  };
+
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [availableStaffs, setAvailableStaffs] = useState<any[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState('');
+  const [imei, setImei] = useState('');
 
   const filteredDevices = devices.filter(device => {
     const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,6 +43,36 @@ export const DevicesPage: React.FC = () => {
     const matchesStatus = statusFilter === 'all' || device.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  useEffect(() => {
+    fetch(`${API_URL}/get_unbound_staffs`)
+      .then(res => res.json())
+      .then(setAvailableStaffs)
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    loadDevices();
+  }, []);
+
+  const loadDevices = () => {
+    fetch(`${API_URL}/get_helmets`)
+      .then(res => res.json())
+      .then(data => {
+        const transformed = data.map((item: any) => ({
+          id: item.imei,
+          name: `${item.staffName} (${item.staffId})`,
+          battery: item.helmetCharge ?? 0,
+          location: '未知',
+          status: 'offline',
+          lastSeen: '剛剛',
+          assignedAt: '',
+          phone: `phone: ${item.helmetPhone}`
+        }));
+        setDevices(transformed);
+      })
+      .catch(err => console.error(err));
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -297,26 +290,45 @@ export const DevicesPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">新增安全帽</h3>
-            <form className="space-y-4">
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                fetch(`${API_URL}/add_helmet`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    staff_id: selectedStaff,
+                    imei: imei,
+                  })
+                })
+                  .then(res => {
+                    if (!res.ok) throw new Error('新增失敗');
+                    return res.json();
+                  })
+                  .then(() => {
+                    setShowAddDevice(false);
+                    loadDevices();
+
+                  })
+                  .catch(err => alert(err.message));
+              }}
+            >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  人員名稱
-                </label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-gray-700 mb-1">人員</label>
+                <select
+                  name="staffs"
+                  value={selectedStaff}
+                  onChange={(e) => setSelectedStaff(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="配對人員姓名"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  血型
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="A/B/O/AB"
-                />
+                >
+                  <option value="">請選擇未綁定人員</option>
+                  {availableStaffs.map(staff => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.name}（{staff.id}）
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -324,6 +336,8 @@ export const DevicesPage: React.FC = () => {
                 </label>
                 <input
                   type="text"
+                  value={imei}
+                  onChange={(e) => setImei(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="862636052640529"
                 />

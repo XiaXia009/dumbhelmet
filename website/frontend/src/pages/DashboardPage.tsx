@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import type { LucideIcon } from 'lucide-react';
 import { io } from "socket.io-client";
 import {
   Users,
@@ -9,6 +8,8 @@ import {
   Battery,
   MapPin,
   Clock,
+  CloudCheck,
+  CloudOff,
   ThermometerSun,
   Wind,
   Wifi,
@@ -33,7 +34,6 @@ const stats = [
 const recentActivity = [
   {
     id: 1,
-    type: 'device_connect',
     message: '測試01-安全帽已連線',
     time: '5分鐘前',
     status: 'success',
@@ -41,7 +41,6 @@ const recentActivity = [
   },
   {
     id: 2,
-    type: 'zone_warning',
     message: '危險區域2有人員進入',
     time: '12分鐘前',
     status: 'warning',
@@ -49,7 +48,6 @@ const recentActivity = [
   },
   {
     id: 3,
-    type: 'personnel_add',
     message: '新增人員：測試01',
     time: '25分鐘前',
     status: 'info',
@@ -57,7 +55,6 @@ const recentActivity = [
   },
   {
     id: 4,
-    type: 'device_low_battery',
     message: '設備 [測試01] 電量低於20%',
     time: '1小時前',
     status: 'warning',
@@ -65,7 +62,6 @@ const recentActivity = [
   },
   {
     id: 5,
-    type: 'emergency',
     message: '緊急按鈕被觸發 - A區',
     time: '2小時前',
     status: 'danger',
@@ -73,7 +69,6 @@ const recentActivity = [
   },
   {
     id: 6,
-    type: 'device_disconnect',
     message: '測試01-安全帽已斷線',
     time: '3小時前',
     status: 'error',
@@ -81,7 +76,6 @@ const recentActivity = [
   },
   {
     id: 7,
-    type: 'general_info',
     message: '系統維護完成',
     time: '4小時前',
     status: 'info',
@@ -89,7 +83,6 @@ const recentActivity = [
   },
   {
     id: 8,
-    type: 'zone_danger',
     message: '高壓電區域檢測到異常且人員未回應',
     time: '5小時前',
     status: 'danger',
@@ -97,7 +90,6 @@ const recentActivity = [
   },
   {
     id: 9,
-    type: 'zone_safe_response',
     message: '高壓電區域檢測到異常但人員回報安全',
     time: '6小時前',
     status: 'resolved',
@@ -122,6 +114,8 @@ const iconMap = {
   Battery,
   MapPin,
   Clock,
+  CloudCheck,
+  CloudOff,
   ThermometerSun,
   Wind,
   Wifi,
@@ -199,6 +193,16 @@ export const DashboardPage: React.FC = () => {
 
     socket.on("disconnect", () => {
       console.log("❌ Socket.IO 已斷線");
+      setActivities((prev) => [
+        {
+          id: Date.now(),
+          message: 'Server is down.',
+          time: new Date().toLocaleTimeString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+          status: 'error',
+          icon: CloudOff
+        },
+        ...prev.slice(0, 49)
+      ]);
     });
 
     socket.on("message", (data) => {
@@ -211,7 +215,6 @@ export const DashboardPage: React.FC = () => {
         setActivities((prev) => [
           {
             id: parsed.id ?? Date.now(),
-            type: parsed.type || "general_info",
             message: parsed.message || "未知訊息",
             time: parsed.time ?? Date.now(),
             status: parsed.status || "info",

@@ -1,9 +1,11 @@
+from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from flasgger import Swagger  # 新增
 from sqlite_linker import SQLiteLinker
 from influx_linker import Influxlinker
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -18,91 +20,137 @@ def index():
     return 'Welcome to Flask SQLite + InfluxDB Example!'
 
 
-@app.route('/add_worker', methods=['POST'])
-def add_worker():
+@app.route('/get_staffs', methods=['GET'])
+def get_staffs():
+    rows = sqlite_linker.get_staffs()
+    staffs = [
+        {
+            'id': row[0],
+            'name': row[1],
+            'role': row[2],
+            'department': row[3],
+            'phone': row[4],
+            'status': row[5],
+            'bloodType': row[6],
+        }
+        for row in rows
+    ]
+    return jsonify(staffs)
+
+@app.route('/get_helmets', methods=['GET'])
+def get_helmets():
+    helmets = sqlite_linker.get_helmets()
+    helmet_list = [
+        {
+            'staffId': row[0],
+            'staffName': row[1],
+            'imei': row[2],
+            'helmetPhone': row[3],
+            'helmetCharge': row[4],
+        }
+        for row in helmets
+    ]
+    return jsonify(helmet_list)
+
+@app.route('/get_unbound_staffs', methods=['GET'])
+def get_unbound_staffs():
+    rows = sqlite_linker.get_unbound_staffs()
+    staffs = [
+        {
+            'id': row[0],
+            'name': row[1],
+            'role': row[2],
+            'department': row[3],
+            'phone': row[4],
+            'status': row[5],
+            'bloodType': row[6],
+        }
+        for row in rows
+    ]
+    return jsonify(staffs)
+
+@app.route('/add_staff', methods=['POST'])
+def add_staff():
     data = request.json
     name = data.get('name')
-    blood_type = data.get('blood_type')
-    uwb_id = data.get('uwb_id')
+    position = data.get('position')
+    department = data.get('department')
+    phone = data.get('phone')
+    status = data.get('status')
+    blood = data.get('blood')
 
-    if not name or not blood_type or not uwb_id:
-        return jsonify({"error": "Name, blood type, and UWB ID are required!"}), 400
+    if not all([name, position, department, phone, status, blood]):
+        return jsonify({"error": "All fields are required!"}), 400
 
-    sqlite_linker.add_worker(name, blood_type, uwb_id)
-    return jsonify({"message": "Worker added successfully!"}), 201
+    staff_id = sqlite_linker.add_staff(name, position, department, phone, status, blood)
+    return jsonify({"message": "Staff added successfully!", "staff_id": staff_id}), 201
 
-
-@app.route('/add_uwb_hardware', methods=['POST'])
-def add_uwb_hardware():
+@app.route('/add_helmet', methods=['POST'])
+def add_helmet():
     data = request.json
-    uwb_id = data.get('uwb_id')
-    uwb_uuid = data.get('uwb_uuid')
+    staff_id = data.get('staff_id')
+    imei = data.get('imei')
 
-    if not uwb_id or not uwb_uuid:
-        return jsonify({"error": "UWB ID and UWB UUID are required!"}), 400
+    if not all([staff_id, imei]):
+        return jsonify({"error": "Staff ID and IMEI are required!"}), 400
 
-    sqlite_linker.add_uwb_hardware(uwb_id, uwb_uuid)
-    return jsonify({"message": "UWB hardware added successfully!"}), 201
+    sqlite_linker.add_helmet(staff_id, imei)
+    return jsonify({"message": "Helmet added successfully!"}), 201
 
-
-@app.route('/add_uwb_position', methods=['POST'])
-def add_uwb_position():
+@app.route('/update_helmet_phone', methods=['POST'])
+def update_helmet_phone():
     data = request.json
-    uwb_uuid = data.get('uwb_uuid')
-    time = data.get('time')
-    x = data.get('x')
-    y = data.get('y')
+    imei = data.get('imei')
+    helmet_phone = data.get('helmet_phone')
 
-    if not uwb_uuid or not time or x is None or y is None:
-        return jsonify({"error": "UWB UUID, time, and coordinates are required!"}), 400
+    if not imei or not helmet_phone:
+        return jsonify({"error": "imei and helmet_phone are required!"}), 400
 
-    sqlite_linker.add_uwb_position(uwb_uuid, time, x, y)
-    return jsonify({"message": "UWB position added to SQLite successfully!"}), 201
+    success = sqlite_linker.update_helmet_phone(imei, helmet_phone)
+    if success:
+        return jsonify({"message": "Helmet phone updated successfully!"}), 200
+    else:
+        return jsonify({"error": "Failed to update helmet phone. Check if IMEI exists."}), 400
 
+@app.route('/update_helmet_charge', methods=['POST'])
+def update_helmet_charge():
+    data = request.json
+    imei = data.get('imei')
+    charge = data.get('charge')
+
+    if not imei or charge is None:
+        return jsonify({"error": "imei and charge are required!"}), 400
+
+    success = sqlite_linker.update_helmet_charge(imei, charge)
+    if success:
+        return jsonify({"message": "Helmet charge updated successfully!"}), 200
+    else:
+        return jsonify({"error": "Failed to update helmet charge. Check if IMEI exists."}), 400
 
 @app.route('/add_uwb_position_influx', methods=['POST'])
 def add_uwb_position_influx():
     data = request.json
-    tag_id = data.get('tag_id')
+    staff_id = data.get('staff_id')
     timestamp = data.get('time')
     x = data.get('x')   
     y = data.get('y')
 
-    if not tag_id or not timestamp or x is None or y is None:
-        return jsonify({"error": "tag_id, time, and coordinates are required!"}), 400
+    if not staff_id or not timestamp or x is None or y is None:
+        return jsonify({"error": "staff_id, time, and coordinates are required!"}), 400
 
-    influx_linker.write_position(tag_id, x, y, timestamp)
+    influx_linker.write_position(staff_id, x, y, timestamp)
     return jsonify({"message": "UWB position added to InfluxDB successfully!"}), 201
-
-
-@app.route('/workers', methods=['GET'])
-def get_workers():
-    workers = sqlite_linker.get_workers()
-    return jsonify(workers)
-
-
-@app.route('/uwb_hardware', methods=['GET'])
-def get_uwb_hardware():
-    hardware = sqlite_linker.get_uwb_hardware()
-    return jsonify(hardware)
-
-
-@app.route('/uwb_positions', methods=['GET'])
-def get_uwb_positions():
-    positions = sqlite_linker.get_uwb_positions()
-    return jsonify(positions)
-
 
 @app.route('/uwb_positions_influx', methods=['GET'])
 def get_uwb_positions_influx():
-    tag_id = request.args.get('tag_id')
+    staff_id = request.args.get('staff_id')
     start = request.args.get('start')
     end = request.args.get('end')
 
-    if not tag_id or not start or not end:
-        return jsonify({"error": "tag_id, start, and end are required!"}), 400
+    if not staff_id or not start or not end:
+        return jsonify({"error": "staff_id, start, and end are required!"}), 400
 
-    data = influx_linker.query_positions(tag_id=tag_id, start_date=start, end_date=end)
+    data = influx_linker.query_positions(staff_id=staff_id, start_date=start, end_date=end)
     return jsonify(data)
 
 @app.route('/login', methods=['POST'])
@@ -133,25 +181,49 @@ def websocket_test():
     if not data:
         return jsonify({"error": "No JSON data"}), 400
 
-    import time
+    activity = broadcast_message(data)
+
+    return jsonify({"status": "OK", "activity": activity}), 200
+
+def broadcast_message(activity_data):
+    ts = activity_data.get("time")
+    if not ts:
+        ts = int(time.time() * 1000)  # 預設當前毫秒
+    else:
+        ts = int(ts)
+
+    # 轉成秒
+    dt = datetime.fromtimestamp(ts / 1000)
+    # 格式化
+    formatted_time = dt.strftime("%m/%d %p%I:%M").replace("AM", "上午").replace("PM", "下午")
+
     activity = {
-        "id": int(data.get("id", 0)) or int(time.time() * 1000),
-        "type": data.get("type", "general_info"),
-        "message": data.get("message", "未知訊息"),
-        "time": data.get("time") or int(time.time() * 1000),
-        "status": data.get("status", "info"),
-        "icon": data.get("icon", "Info"),
+        "message": activity_data.get("message", "未知訊息"),
+        "time": formatted_time,
+        "status": activity_data.get("status"),
+        "icon": activity_data.get("icon"),
     }
 
     emit('message', activity, broadcast=True, namespace='/')
-    return jsonify({"status": "OK", "activity": activity}), 200
+    return activity
 
 @socketio.on('connect')
 def handle_connect():
+    broadcast_message({
+        "message": "Server is running up.",
+        "status": "success",
+        "icon": "CloudCheck"
+    })
     print('Client connected')
 
 @socketio.on('disconnect')
 def handle_disconnect():
+    broadcast_message({
+        "type": "disconnection",
+        "message": "A client has disconnected.",
+        "status": "info",
+        "icon": "Info"
+    })
     print('Client disconnected')
 
 if __name__ == '__main__':
