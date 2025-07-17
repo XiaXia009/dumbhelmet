@@ -1,7 +1,7 @@
 from influxdb_client import InfluxDBClient, Point, WriteOptions
 
 class Influxlinker:
-    def __init__(self, url='http://localhost:8086', token='ObuFHSb_w5Yce3JFIkOoSjQafxe9TFi8Qu5fH4dkpkhFtgdBVbNkAG58aU-GrLa-5IMm_dPlrCEuH9LM8Dy3mg==', org='bibo', bucket='bibo'):
+    def __init__(self, url='http://localhost:8086', token='iFZAb1Wj2JTZkHzN_nsyFNCgJvOCiMKK51qf-PP4H-fN88kHTvBOrbm4wD4de8Cfsy-O8a79sa4r_MQFnMTPrw==', org='bibo', bucket='bibo'):
         self.client = InfluxDBClient(url=url, token=token, org=org)
         self.write_api = self.client.write_api(write_options=WriteOptions(batch_size=1))
         self.query_api = self.client.query_api()
