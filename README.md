@@ -1,5 +1,5 @@
 # <img src="https://media.discordapp.net/stickers/867827427501408266.png" width="7%" alt="goose"> 外掛式智慧工業安全帽擴充 <img src="https://media.discordapp.net/stickers/867827427501408266.png" width="7%" alt="goose">
-## <img src="https://cdn.discordapp.com/attachments/997472083414106163/1399103694003507300/flushed-rotate-unscreen.gif?ex=6887c85a&is=688676da&hm=d38ba159add03820943e8d9bb280dee2a4e699284671efb4d6fb389cffe38f74&" width="4%" alt="cat"> 硬體清單
+## <img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="4%" alt="cat"> 硬體清單
 | 硬體名稱            | 現有數量 | 需要數量 |
 | ------------------- | -------- | -------- |
 | **AMB 82**          | `x1`     | `x1`     |
