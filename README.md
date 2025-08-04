@@ -28,7 +28,6 @@ reparam_yolov7-tiny.py --weights best.pt --custom_yaml yolov7-tiny-deploy.yaml -
     <img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat">
     <img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat">
     <img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat">
-    <img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat">
 </span>
 
 ---
