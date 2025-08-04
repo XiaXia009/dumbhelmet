@@ -11,6 +11,25 @@
 | **行動電源**        | `x0`     | `x1`     |
 | **安全帽**          | `x2`     | `x0`     |
 
+
+---
+# 幹幹幹 我找問題找了兩天 幹你娘 開發文檔寫這麼爛 檔案藏在奇怪的地方 可悲Realtek 我不想用AMB82了
+`
+reparam_yolov7-tiny.py --weights best.pt --custom_yaml yolov7-tiny-deploy.yaml --output thedocslikeshit.pt
+`  
+
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat">  
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+<img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="10%" alt="cat"> 
+
+
 ---
 
 ## <img src="https://cdn3.emoji.gg/emojis/48188-cat-cips.gif" width="4%" alt="cat"> 項目
@@ -26,4 +45,8 @@
 - [ ] BMV31T001
 
 #### AD
-- [ ] ?
+- [x] 基站疊版
+
+#### 建模
+- [x] 基站
+- [ ] 安全帽

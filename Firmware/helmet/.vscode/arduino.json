@@ -1,0 +1,7 @@
+{
+    "port": "COM7",
+    "configuration": "upload_method=swd0,error_id=disabled,ICE_id=Board0",
+    "board": "HT32:HT32:BM53A367A",
+    "programmer": "HT32:BMduino_ICP",
+    "sketch": "hetmet\\hetmet.ino"
+}
