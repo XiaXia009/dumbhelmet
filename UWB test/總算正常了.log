@@ -1,0 +1,66 @@
+PS C:\Users\a0965\OneDrive\桌面\dumbhelmet\Service\backend> & C:/Users/a0965/AppData/Local/Programs/Python/Python312/python.exe c:/Users/a0965/OneDrive/桌面/dumbhelmet/Service/backend/tcp_server.py
+[TCP] Listening...
+[TCP] Waiting for 3 IPs to connect
+[TCP] New IP connected: 172.20.10.5
+[TCP] Current connected IPs: ['172.20.10.5']
+[TCP] Got from 172.20.10.5: /id
+[TCP] Got from 172.20.10.5: /id
+[TCP] New IP connected: 172.20.10.2
+[TCP] Current connected IPs: ['172.20.10.5', '172.20.10.2']
+[TCP] Got from 172.20.10.2: /id
+[TCP] New IP connected: 172.20.10.4
+[TCP] Current connected IPs: ['172.20.10.5', '172.20.10.2', '172.20.10.4']
+[TCP] 3 anchors connected. 開始逐輪測距
+[TCP] Got from 172.20.10.4: /id
+[CTRL] Phase 1: set modes ('tag', 'anchor', 'anchor'), waiting data from index 0 (172.20.10.5)
+[MSG INFO] Sending "tag" to 172.20.10.5
+[MSG INFO] Sending "anchor" to 172.20.10.2
+[MSG INFO] Sending "anchor" to 172.20.10.4
+[TCP] Got from 172.20.10.5: an1:0.05m
+an2:0.06m
+an1:0.09m
+an2:0.12m
+an1:0.14m
+an2:0.17m
+[CTRL] Phase 1: received data from 172.20.10.5: an1:0.05m
+an2:0.06m
+an1:0.09m
+an2:0.12m
+an1:0.14m
+an2:0.17m
+[CTRL] Phase 2: set modes ('anchor', 'tag', 'anchor'), waiting data from index 1 (172.20.10.2)
+[MSG INFO] Sending "anchor" to 172.20.10.5
+[MSG INFO] Sending "tag" to 172.20.10.2
+[MSG INFO] Sending "anchor" to 172.20.10.4
+[TCP] Got from 172.20.10.2: an0:0.05m
+an2:0.04m
+an0:0.10m
+an2:0.07m
+an0:0.14m
+an2:0.11m
+[CTRL] Phase 2: received data from 172.20.10.2: an0:0.05m
+an2:0.04m
+an0:0.10m
+an2:0.07m
+an0:0.14m
+an2:0.11m
+[CTRL] Phase 3: set modes ('anchor', 'anchor', 'tag'), waiting data from index 2 (172.20.10.4)
+[MSG INFO] Sending "anchor" to 172.20.10.5
+[MSG INFO] Sending "anchor" to 172.20.10.2
+[MSG INFO] Sending "tag" to 172.20.10.4
+[TCP] Got from 172.20.10.4: an0:0.05m
+an1:0.04m
+an0:0.10m
+an1:0.08m
+an0:0.15m
+an1:0.13m
+[CTRL] Phase 3: received data from 172.20.10.4: an0:0.05m
+an1:0.04m
+an0:0.10m
+an1:0.08m
+an0:0.15m
+an1:0.13m
+[CTRL] All phases done.
+[TCP] Got from 172.20.10.2: /id
+[TCP] Got from 172.20.10.4: /id
+[TCP] Got from 172.20.10.5: /id
