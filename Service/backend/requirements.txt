@@ -3,3 +3,6 @@ flask_cors
 flask_socketio
 flasgger
 influxdb_client
+matplotlib
+tkinter
+numpy

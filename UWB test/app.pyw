@@ -4,6 +4,15 @@ from tkinter import Tk, Label, Button, Entry, StringVar, Frame, IntVar, Checkbut
 from tkinter import messagebox, ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import rcParams
+import argparse
+import sys
+
+parser = argparse.ArgumentParser(description="三角形座標繪製工具")
+parser.add_argument("-AB", type=float, help="邊 AB 長度")
+parser.add_argument("-AC", type=float, help="邊 AC 長度")
+parser.add_argument("-BC", type=float, help="邊 BC 長度")
+parser.add_argument("-center", action="store_true", help="啟用圖形置中顯示")
+args = parser.parse_args()
 
 
 rcParams['font.family'] = 'Microsoft YaHei'
@@ -14,6 +23,7 @@ rcParams['xtick.labelsize'] = 10
 rcParams['ytick.labelsize'] = 10
 
 # 全域變數儲存目前的三角形座標和視圖狀態
+
 current_triangle = None
 auto_center_mode = False
 
@@ -324,5 +334,15 @@ ax.set_xlabel('X 座標', fontsize=12, fontweight='bold')
 ax.set_ylabel('Y 座標', fontsize=12, fontweight='bold')
 ax.set_title('基站位置', fontsize=14, fontweight='bold', pad=20)
 ax.set_facecolor('#f8f9fa')
+
+if args.center:
+    auto_center_checkbox.set(1)
+    auto_center_mode = True  # 讓 update_plot 直接置中
+
+if args.AB and args.AC and args.BC:
+    entryAB.insert(0, str(args.AB))
+    entryAC.insert(0, str(args.AC))
+    entryBC.insert(0, str(args.BC))
+    update_plot()
 
 root.mainloop()
