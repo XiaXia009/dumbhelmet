@@ -1,4 +1,5 @@
-# <img src="https://media.discordapp.net/stickers/867827427501408266.png" width="7%" alt="goose"> 外掛式智慧工業安全帽擴充 <img src="https://media.discordapp.net/stickers/867827427501408266.png" width="7%" alt="goose">
+# <img src="https://media.discordapp.net/stickers/867827427501408266.png" width="7%" alt="goose"> 外掛式智慧工業安全帽擴充 <img src="https://media.discordapp.net/stickers/867827427501408266.png" width="7%" alt="goose">  
+[Dashboard](https://dashboard.xn--we-n6a.com/) https://dashboard.weǹ.com
 ## <img src="https://cdn.discordapp.com/emojis/1249403201560645714" width="4%" alt="cat"> 硬體清單
 | 硬體名稱            | 現有數量 | 需要數量 |
 | ------------------- | -------- | -------- |
